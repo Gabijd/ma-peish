@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comparativa de Algoritmos de Ordenamiento</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-dark: #4338ca;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-color: #1e293b;
+            --border-color: #cbd5e1;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1, h2 {
+            color: var(--primary-dark);
+            text-align: center;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            background: white;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background-color: var(--primary);
+            color: white;
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background-color: #f1f5f9;
+        }
+
+        .lists-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .lists-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 0.85rem;
+            max-height: 400px;
+            margin: 0;
+        }
+
+        .output-box {
+            background: #f1f5f9;
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            border-radius: 4px;
+            height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+
+        .btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            font-size: 0.9rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-dark);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Análisis y Comparativa de Algoritmos de Ordenamiento</h1>
+
+    <!-- Tabla Comparativa General -->
+    <div class="card">
+        <h2>Tabla Comparativa de Rendimiento</h2>
+        <p>Resultados obtenidos al procesar y ordenar los registros generados:</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Método</th>
+                    <th>Iteraciones</th>
+                    <th>Comparaciones</th>
+                    <th>Intercambios</th>
+                    <th>Tiempo (ms)</th>
+                </tr>
+            </thead>
+            <tbody id="tabla-resultados">
+                <!-- Se llena mediante JavaScript -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Listas Ordenadas -->
+    <div class="lists-container">
+        <div class="card">
+            <h3>Lista Ordenada por Nombre</h3>
+            <div id="output-nombre" class="output-box"></div>
+        </div>
+        <div class="card">
+            <h3>Lista Ordenada por Cantidad</h3>
+            <div id="output-cantidad" class="output-box"></div>
+            <p id="total-generados" style="margin-top: 10px; font-weight: bold;"></p>
+        </div>
+    </div>
+
+    <!-- Código fuente Java completo con botón de copiar -->
+    <div class="card">
+        <div class="code-header">
+            <h2>Código Fuente Java Completo</h2>
+            <button class="btn" onclick="copiarCodigo()">📋 Copiar Código</button>
+        </div>
+        <pre><code id="codigo-java"></code></pre>
+    </div>
+</div>
+
+<script>
+    // Código fuente Java completo que proporcionaste
+    const codigoJavaTexto = `import java.util.*;
+
+class Main {
+
+    static class Registro {
+        String nombre; 
+        int cantidad;
+        
+        Registro(String nombre, int cantidad) {
+            this.nombre = nombre; 
+            this.cantidad = cantidad;
+        }
+        
+        public String toString() {
+            return nombre + "_" + cantidad;
+        }
+    }
+
+    static class Estadisticas {
+        String nombreMetodo;
+        long iteraciones = 0;
+        long comparaciones = 0;
+        long intercambios = 0;
+        long tiempoNs = 0;
+        long memoriaBytes = 0;
+
+        Estadisticas(String nombreMetodo) {
+            this.nombreMetodo = nombreMetodo;
+        }
+    }
+
+    // Criterio 1: Ordenar primero por Nombre alfabéticamente, luego por cantidad
+    static int compararPorNombre(Registro a, Registro b) {
+        int r = a.nombre.compareToIgnoreCase(b.nombre);
+        if (r != 0) return r;
+        return Integer.compare(a.cantidad, b.cantidad);
+    }
+
+    // Criterio 2: Ordenar primero por Cantidad ascendente, luego por nombre
+    static int compararPorCantidad(Registro a, Registro b) {
+        int r = Integer.compare(a.cantidad, b.cantidad);
+        if (r != 0) return r;
+        return a.nombre.compareToIgnoreCase(b.nombre);
+    }
+
+    // --- 1. BURBUJA MEJORADO ---
+    static void burbujaMejorado(Registro[] datos, Estadisticas stats, boolean porNombre) {
+        int N = datos.length;
+        for (int i = N - 1; i > 0; i--) {
+            stats.iteraciones++;
+            for (int j = 0; j < i; j++) {
+                stats.iteraciones++;
+                stats.comparaciones++;
+
+                boolean condicion = porNombre ? 
+                    (compararPorNombre(datos[j], datos[j + 1]) > 0) : 
+                    (compararPorCantidad(datos[j], datos[j + 1]) > 0);
+
+                if (condicion) {
+                    Registro temp = datos[j];
+                    datos[j] = datos[j + 1];
+                    datos[j + 1] = temp;
+                    stats.intercambios++;
+                }
+            }
+        }
+    }
+
+    // --- 2. QUICKSORT ---
+    static void ordenacionRapida(Registro vec[], Estadisticas stats, boolean porNombre) {
+        final int N = vec.length;
+        quickSort(vec, 0, N - 1, stats, porNombre);
+    }
+
+    static void quickSort(Registro vec[], int inicio, int fin, Estadisticas stats, boolean porNombre) {
+        if (inicio >= fin) return;
+
+        stats.iteraciones++;
+        Registro pivote = vec[inicio];
+        int elemIzq = inicio + 1;
+        int elemDer = fin;
+
+        while (elemIzq <= elemDer) {
+            stats.iteraciones++;
+
+            while (elemIzq <= fin) {
+                stats.iteraciones++;
+                stats.comparaciones++;
+                int comp = porNombre ? compararPorNombre(vec[elemIzq], pivote) : compararPorCantidad(vec[elemIzq], pivote);
+                if (comp < 0) {
+                    elemIzq++;
+                } else {
+                    break;
+                }
+            }
+
+            while (elemDer > inicio) {
+                stats.iteraciones++;
+                stats.comparaciones++;
+                int comp = porNombre ? compararPorNombre(vec[elemDer], pivote) : compararPorCantidad(vec[elemDer], pivote);
+                if (comp >= 0) {
+                    elemDer--;
+                } else {
+                    break;
+                }
+            }
+
+            if (elemIzq < elemDer) {
+                Registro temp = vec[elemIzq];
+                vec[elemIzq] = vec[elemDer];
+                vec[elemDer] = temp;
+                stats.intercambios++;
+            }
+        }
+
+        if (elemDer > inicio) {
+            Registro temp = vec[inicio];
+            vec[inicio] = vec[elemDer];
+            vec[elemDer] = temp;
+            stats.intercambios++;
+        }
+
+        quickSort(vec, inicio, elemDer - 1, stats, porNombre);
+        quickSort(vec, elemDer + 1, fin, stats, porNombre);
+    }
+
+    // --- 3. SHELLSORT ---
+    static Registro[] ordenamientoShellSort(Registro vec[], Estadisticas stats, boolean porNombre) {
+        final int N = vec.length;
+        int k = N / 2;
+
+        while (k >= 1) {
+            stats.iteraciones++;
+            for (int i = 0; i < k; i++) {
+                stats.iteraciones++;
+                for (int j = k + i; j < N; j += k) {
+                    stats.iteraciones++;
+                    Registro v = vec[j];
+                    int n = j - k;
+
+                    while (n >= 0) {
+                        stats.iteraciones++;
+                        stats.comparaciones++;
+                        int comp = porNombre ? compararPorNombre(vec[n], v) : compararPorCantidad(vec[n], v);
+                        if (comp > 0) {
+                            vec[n + k] = vec[n];
+                            stats.intercambios++;
+                            n -= k;
+                        } else {
+                            break;
+                        }
+                    }
+                    vec[n + k] = v;
+                }
+            }
+            k /= 2;
+        }
+        return vec;
+    }
+
+    // --- 4. SELECCIÓN ---
+    static Registro[] ordenacionPorSeleccion(Registro[] lista, Estadisticas stats, boolean porNombre) {
+        final int N = lista.length;
+
+        for (int i = 0; i < N; i++) {
+            stats.iteraciones++;
+            int posMenor = i;
+
+            for (int j = i + 1; j < N; j++) {
+                stats.iteraciones++;
+                stats.comparaciones++;
+
+                int comp = porNombre ? compararPorNombre(lista[j], lista[posMenor]) : compararPorCantidad(lista[j], lista[posMenor]);
+                if (comp < 0) {
+                    posMenor = j;
+                }
+            }
+
+            if (posMenor != i) {
+                Registro temp = lista[i];
+                lista[i] = lista[posMenor];
+                lista[posMenor] = temp;
+                stats.intercambios++;
+            }
+        }
+        return lista;
+    }
+
+    // --- 5. INSERCIÓN ---
+    static Registro[] ordenacionInsercion(Registro vec[], Estadisticas stats, boolean porNombre) {
+        final int N = vec.length;
+
+        for (int i = 1; i < N; i++) {
+            stats.iteraciones++;
+            int j = i;
+
+            while (j > 0) {
+                stats.iteraciones++;
+                stats.comparaciones++;
+
+                int comp = porNombre ? compararPorNombre(vec[j], vec[j - 1]) : compararPorCantidad(vec[j], vec[j - 1]);
+                if (comp < 0) {
+                    Registro temp = vec[j];
+                    vec[j] = vec[j - 1];
+                    vec[j - 1] = temp;
+                    stats.intercambios++;
+                    j--;
+                } else {
+                    break;
+                }
+            }
+        }
+        return vec;
+    }
+
+    // Utilidad para clonar el arreglo base
+    static Registro[] clonarArreglo(Registro[] original) {
+        Registro[] copia = new Registro[original.length];
+        for (int i = 0; i < original.length; i++) {
+            copia[i] = new Registro(original[i].nombre, original[i].cantidad);
+        }
+        return copia;
+    }
+
+    public static void main(String[] args) {
+        String[] nombres = {"Ana", "Luis", "María", "David", "Sofía", "Carlos", "Elena", "Alejandro", "Isabella", "Juan", "Valentina", "Andrea", "Pedro", "Camila", "Fernando", "Laura", "Diego", "Carolina", "Gabriel", "Javier", "Luciana", "Esteban", "Ximena", "Ricardo", "Micaela", "Felipe", "Bárbara", "Santi", "Valeria", "Hugo", "Florencia", "Marcos", "Agustina", "Damián", "Renata", "Joaquín", "Maite", "Bautista", "Irene", "Rodrigo", "Samuel", "Jimena", "Emilio", "Julieta", "Tomás", "Amparo", "Celia", "Vicente", "Ainhoa", "Mateo", "Belén", "Nicolás", "Fátima", "Sebastián", "Gloria", "Leonardo", "Nuria", "Matías", "Silvia", "Agustín", "Ana", "Luis", "María", "David", "Sofía", "Carlos", "Elena", "Alejandro", "Isabella", "Juan", "Valentina", "Andrea", "Pedro", "Camila", "Fernando", "Laura", "Diego", "Carolina", "Gabriel", "Javier", "Luciana", "Esteban", "Ximena", "Ricardo", "Micaela", "Felipe", "Bárbara", "Santi", "Valeria", "Hugo", "Florencia", "Marcos", "Agustina", "Damián", "Renata", "Joaquín", "Maite", "Bautista", "Irene", "Rodrigo", "Samuel", "Jimena", "Emilio", "Julieta", "Tomás", "Amparo", "Celia", "Vicente", "Ainhoa", "Mateo", "Belén", "Nicolás", "Fátima", "Sebastián", "Gloria", "Leonardo", "Nuria", "Matías", "Silvia", "Agustín", "Ana", "Luis", "María", "David", "Sofía", "Carlos", "Elena", "Alejandro", "Isabella", "Juan", "Valentina", "Andrea", "Pedro", "Camila", "Fernando", "Laura", "Diego", "Carolina", "Gabriel", "Javier", "Luciana", "Esteban", "Ximena", "Ricardo", "Micaela", "Felipe", "Bárbara", "Santi", "Valeria", "Hugo", "Florencia", "Marcos", "Agustina", "Damián", "Renata", "Joaquín", "Maite", "Bautista", "Irene", "Rodrigo", "Samuel", "Jimena", "Emilio", "Julieta", "Tomás", "Amparo", "Celia", "Vicente", "Ainhoa", "Mateo", "Belén", "Nicolás", "Fátima", "Sebastián", "Gloria", "Leonardo", "Nuria", "Matías", "Silvia", "Agustín", "Ana", "Luis", "María", "David", "Sofía", "Carlos", "Elena", "Alejandro", "Isabella", "Juan", "Valentina", "Andrea", "Pedro", "Camila", "Fernando", "Laura", "Diego", "Carolina", "Gabriel", "Javier"};
+
+        // Conteo de repeticiones sin usar HashMap
+        ArrayList<Registro> listaTemporal = new ArrayList<>();
+        int totalGenerados = 0;
+        for (String nombre : nombres) {
+            totalGenerados++;
+            boolean encontrado = false;
+            for (Registro r : listaTemporal) {
+                if (r.nombre.equalsIgnoreCase(nombre)) {
+                    r.cantidad++;
+                    encontrado = true;
+                    break;
+                }
+            }
+            if (!encontrado) {
+                listaTemporal.add(new Registro(nombre, 1));
+            }
+        }
+
+        Registro[] datosBase = listaTemporal.toArray(new Registro[0]);
+
+        // --- 1. IMPRESIÓN ORDENADA POR NOMBRE ---
+        System.out.println("=== LISTA ORDENADA POR NOMBRE ===");
+        Registro[] datosPorNombre = clonarArreglo(datosBase);
+        Estadisticas statsNombre = new Estadisticas("QuickSortNombre");
+        ordenacionRapida(datosPorNombre, statsNombre, true);
+        for (Registro r : datosPorNombre) {
+            System.out.println(r);
+        }
+
+        // --- 2. IMPRESIÓN ORDENADA POR CANTIDAD ---
+        System.out.println("\\n=== LISTA ORDENADA POR CANTIDAD ===");
+        Registro[] datosPorCantidad = clonarArreglo(datosBase);
+        Estadisticas statsCantidad = new Estadisticas("QuickSortCantidad");
+        ordenacionRapida(datosPorCantidad, statsCantidad, false);
+        for (Registro r : datosPorCantidad) {
+            System.out.println(r);
+        }
+        System.out.println("Total de nombres generados: " + totalGenerados);
+
+        // --- 3. TABLA COMPARATIVA DE RENDIMIENTO DE LOS ALGORITMOS ---
+        List<Estadisticas> resultados = new ArrayList<>();
+        
+        // Burbuja Mejorado (Por cantidad)
+        {
+            Registro[] datos = clonarArreglo(datosBase);
+            Estadisticas stats = new Estadisticas("Burbuja Mejorado");
+            long tInicio = System.nanoTime();
+            burbujaMejorado(datos, stats, false);
+            stats.tiempoNs = System.nanoTime() - tInicio;
+            resultados.add(stats);
+        }
+        // QuickSort (Por cantidad)
+        {
+            Registro[] datos = clonarArreglo(datosBase);
+            Estadisticas stats = new Estadisticas("QuickSort");
+            long tInicio = System.nanoTime();
+            ordenacionRapida(datos, stats, false);
+            stats.tiempoNs = System.nanoTime() - tInicio;
+            resultados.add(stats);
+        }
+        // ShellSort (Por cantidad)
+        {
+            Registro[] datos = clonarArreglo(datosBase);
+            Estadisticas stats = new Estadisticas("ShellSort");
+            long tInicio = System.nanoTime();
+            ordenamientoShellSort(datos, stats, false);
+            stats.tiempoNs = System.nanoTime() - tInicio;
+            resultados.add(stats);
+        }
+        // Selección (Por cantidad)
+        {
+            Registro[] datos = clonarArreglo(datosBase);
+            Estadisticas stats = new Estadisticas("Selección");
+            long tInicio = System.nanoTime();
+            ordenacionPorSeleccion(datos, stats, false);
+            stats.tiempoNs = System.nanoTime() - tInicio;
+            resultados.add(stats);
+        }
+        // Inserción (Por cantidad)
+        {
+            Registro[] datos = clonarArreglo(datosBase);
+            Estadisticas stats = new Estadisticas("Inserción");
+            long tInicio = System.nanoTime();
+            ordenacionInsercion(datos, stats, false);
+            stats.tiempoNs = System.nanoTime() - tInicio;
+            resultados.add(stats);
+        }
+
+        System.out.println("\\n==================================================================================================");
+        System.out.printf("%-18s | %-12s | %-14s | %-12s | %-15s\\n", 
+                "Método", "Iteraciones", "Comparaciones", "Intercambios", "Velocidad (ns)");
+        System.out.println("==================================================================================================");
+        for (Estadisticas s : resultados) {
+            System.out.printf("%-18s | %-12d | %-14d | %-12d | %-15d\\n",
+                    s.nombreMetodo, s.iteraciones, s.comparaciones, s.intercambios, s.tiempoNs);
+        }
+        System.out.println("==================================================================================================");
+    }
+}`;
+
+    // Mostrar el código en la etiqueta <pre><code>
+    document.getElementById("codigo-java").textContent = codigoJavaTexto;
+
+    // Función para copiar el código al portapapeles
+    function copiarCodigo() {
+        navigator.clipboard.writeText(codigoJavaTexto).then(() => {
+            const btn = document.querySelector(".code-header button");
+            btn.textContent = "✅ ¡Copiado!";
+            setTimeout(() => {
+                btn.textContent = "📋 Copiar Código";
+            }, 2000);
+        }).catch(err => {
+            console.error('Error al copiar el código: ', err);
+        });
+    }
+
+    // Datos iniciales de nombres
+    const nombres = ["Ana", "Luis", "María", "David", "Sofía", "Carlos", "Elena", "Alejandro", "Isabella", "Juan", "Valentina", "Andrea", "Pedro", "Camila", "Fernando", "Laura", "Diego", "Carolina", "Gabriel", "Javier", "Luciana", "Esteban", "Ximena", "Ricardo", "Micaela", "Felipe", "Bárbara", "Santi", "Valeria", "Hugo", "Florencia", "Marcos", "Agustina", "Damián", "Renata", "Joaquín", "Maite", "Bautista", "Irene", "Rodrigo", "Samuel", "Jimena", "Emilio", "Julieta", "Tomás", "Amparo", "Celia", "Vicente", "Ainhoa", "Mateo", "Belén", "Nicolás", "Fátima", "Sebastián", "Gloria", "Leonardo", "Nuria", "Matías", "Silvia", "Agustín", "Ana", "Luis", "María", "David", "Sofía", "Carlos", "Elena", "Alejandro", "Isabella", "Juan", "Valentina", "Andrea", "Pedro", "Camila", "Fernando", "Laura", "Diego", "Carolina", "Gabriel", "Javier", "Luciana", "Esteban", "Ximena", "Ricardo", "Micaela", "Felipe", "Bárbara", "Santi", "Valeria", "Hugo", "Florencia", "Marcos", "Agustina", "Damián", "Renata", "Joaquín", "Maite", "Bautista", "Irene", "Rodrigo", "Samuel", "Jimena", "Emilio", "Julieta", "Tomás", "Amparo", "Celia", "Vicente", "Ainhoa", "Mateo", "Belén", "Nicolás", "Fátima", "Sebastián", "Gloria", "Leonardo", "Nuria", "Matías", "Silvia", "Agustín", "Ana", "Luis", "María", "David", "Sofía", "Carlos", "Elena", "Alejandro", "Isabella", "Juan", "Valentina", "Andrea", "Pedro", "Camila", "Fernando", "Laura", "Diego", "Carolina", "Gabriel", "Javier", "Luciana", "Esteban", "Ximena", "Ricardo", "Micaela", "Felipe", "Bárbara", "Santi", "Valeria", "Hugo", "Florencia", "Marcos", "Agustina", "Damián", "Renata", "Joaquín", "Maite", "Bautista", "Irene", "Rodrigo", "Samuel", "Jimena", "Emilio", "Julieta", "Tomás", "Amparo", "Celia", "Vicente", "Ainhoa", "Mateo", "Belén", "Nicolás", "Fátima", "Sebastián", "Gloria", "Leonardo", "Nuria", "Matías", "Silvia", "Agustín", "Ana", "Luis", "María", "David", "Sofía", "Carlos", "Elena", "Alejandro", "Isabella", "Juan", "Valentina", "Andrea", "Pedro", "Camila", "Fernando", "Laura", "Diego", "Carolina", "Gabriel", "Javier"];
+
+    // Procesamiento y conteo
+    let listaTemporal = [];
+    let totalGenerados = 0;
+    nombres.forEach(nombre => {
+        totalGenerados++;
+        let encontrado = false;
+        for (let r of listaTemporal) {
+            if (r.nombre.toLowerCase() === nombre.toLowerCase()) {
+                r.cantidad++;
+                encontrado = true;
+                break;
+            }
+        }
+        if (!encontrado) {
+            listaTemporal.push({ nombre: nombre, cantidad: 1 });
+        }
+    });
+
+    function clonar(arr) {
+        return arr.map(item => ({ ...item }));
+    }
+
+    // Funciones de comparación
+    function compararPorNombre(a, b) {
+        let r = a.nombre.localeCompare(b.nombre, undefined, { sensitivity: 'accent' });
+        if (r !== 0) return r;
+        return a.cantidad - b.cantidad;
+    }
+
+    function compararPorCantidad(a, b) {
+        let r = a.cantidad - b.cantidad;
+        if (r !== 0) return r;
+        return a.nombre.localeCompare(b.nombre, undefined, { sensitivity: 'accent' });
+    }
+
+    // Algoritmos en JavaScript
+    function burbujaMejorado(datos, porNombre) {
+        let stats = { iteraciones: 0, comparaciones: 0, intercambios: 0 };
+        let N = datos.length;
+        for (let i = N - 1; i > 0; i--) {
+            stats.iteraciones++;
+            for (let j = 0; j < i; j++) {
+                stats.iteraciones++;
+                stats.comparaciones++;
+                let cond = porNombre ? (compararPorNombre(datos[j], datos[j + 1]) > 0) : (compararPorCantidad(datos[j], datos[j + 1]) > 0);
+                if (cond) {
+                    let temp = datos[j];
+                    datos[j] = datos[j + 1];
+                    datos[j + 1] = temp;
+                    stats.intercambios++;
+                }
+            }
+        }
+        return stats;
+    }
+
+    function quick(vec, inicio, fin, porNombre, stats) {
+        if (inicio >= fin) return;
+        stats.iteraciones++;
+        let pivote = vec[inicio];
+        let elemIzq = inicio + 1;
+        let elemDer = fin;
+
+        while (elemIzq <= elemDer) {
+            stats.iteraciones++;
+            while (elemIzq <= fin) {
+                stats.iteraciones++;
+                stats.comparaciones++;
+                let comp = porNombre ? compararPorNombre(vec[elemIzq], pivote) : compararPorCantidad(vec[elemIzq], pivote);
+                if (comp < 0) elemIzq++; else break;
+            }
+            while (elemDer > inicio) {
+                stats.iteraciones++;
+                stats.comparaciones++;
+                let comp = porNombre ? compararPorNombre(vec[elemDer], pivote) : compararPorCantidad(vec[elemDer], pivote);
+                if (comp >= 0) elemDer--; else break;
+            }
+            if (elemIzq < elemDer) {
+                let temp = vec[elemIzq];
+                vec[elemIzq] = vec[elemDer];
+                vec[elemDer] = temp;
+                stats.intercambios++;
+            }
+        }
+        if (elemDer > inicio) {
+            let temp = vec[inicio];
+            vec[inicio] = vec[elemDer];
+            vec[elemDer] = temp;
+            stats.intercambios++;
+        }
+        quick(vec, inicio, elemDer - 1, porNombre, stats);
+        quick(vec, elemDer + 1, fin, porNombre, stats);
+    }
+
+    function ordenacionRapida(datos, porNombre) {
+        let stats = { iteraciones: 0, comparaciones: 0, intercambios: 0 };
+        quick(datos, 0, datos.length - 1, porNombre, stats);
+        return stats;
+    }
+
+    function ordenamientoShellSort(vec, porNombre) {
+        let stats = { iteraciones: 0, comparaciones: 0, intercambios: 0 };
+        let N = vec.length;
+        let k = Math.floor(N / 2);
+        while (k >= 1) {
+            stats.iteraciones++;
+            for (let i = 0; i < k; i++) {
+                stats.iteraciones++;
+                for (let j = k + i; j < N; j += k) {
+                    stats.iteraciones++;
+                    let v = vec[j];
+                    let n = j - k;
+                    while (n >= 0) {
+                        stats.iteraciones++;
+                        stats.comparaciones++;
+                        let comp = porNombre ? compararPorNombre(vec[n], v) : compararPorCantidad(vec[n], v);
+                        if (comp > 0) {
+                            vec[n + k] = vec[n];
+                            stats.intercambios++;
+                            n -= k;
+                        } else {
+                            break;
+                        }
+                    }
+                    vec[n + k] = v;
+                }
+            }
+            k = Math.floor(k / 2);
+        }
+        return stats;
+    }
+
+    function ordenacionPorSeleccion(lista, porNombre) {
+        let stats = { iteraciones: 0, comparaciones: 0, intercambios: 0 };
+        let N = lista.length;
+        for (let i = 0; i < N; i++) {
+            stats.iteraciones++;
+            let posMenor = i;
+            for (let j = i + 1; j < N; j++) {
+                stats.iteraciones++;
+                stats.comparaciones++;
+                let comp = porNombre ? compararPorNombre(lista[j], lista[posMenor]) : compararPorCantidad(lista[j], lista[posMenor]);
+                if (comp < 0) posMenor = j;
+            }
+            if (posMenor !== i) {
+                let temp = lista[i];
+                lista[i] = lista[posMenor];
+                lista[posMenor] = temp;
+                stats.intercambios++;
+            }
+        }
+        return stats;
+    }
+
+    function ordenacionInsercion(vec, porNombre) {
+        let stats = { iteraciones: 0, comparaciones: 0, intercambios: 0 };
+        let N = vec.length;
+        for (let i = 1; i < N; i++) {
+            stats.iteraciones++;
+            let j = i;
+            while (j > 0) {
+                stats.iteraciones++;
+                stats.comparaciones++;
+                let comp = porNombre ? compararPorNombre(vec[j], vec[j - 1]) : compararPorCantidad(vec[j], vec[j - 1]);
+                if (comp < 0) {
+                    let temp = vec[j];
+                    vec[j] = vec[j - 1];
+                    vec[j - 1] = temp;
+                    stats.intercambios++;
+                    j--;
+                } else {
+                    break;
+                }
+            }
+        }
+        return stats;
+    }
+
+    // Renderizar vistas visuales
+    let datosNom = clonar(listaTemporal);
+    ordenacionRapida(datosNom, true);
+    document.getElementById("output-nombre").innerHTML = datosNom.map(r => `${r.nombre}_${r.cantidad}`).join("<br>");
+
+    let datosCant = clonar(listaTemporal);
+    ordenacionRapida(datosCant, false);
+    document.getElementById("output-cantidad").innerHTML = datosCant.map(r => `${r.nombre}_${r.cantidad}`).join("<br>");
+    document.getElementById("total-generados").textContent = `Total de nombres generados: ${totalGenerados}`;
+
+    // Tabla comparativa
+    const metodos = [
+        { nombre: "Burbuja Mejorado", fn: (d) => burbujaMejorado(d, false) },
+        { nombre: "QuickSort", fn: (d) => ordenacionRapida(d, false) },
+        { nombre: "ShellSort", fn: (d) => ordenamientoShellSort(d, false) },
+        { nombre: "Selección", fn: (d) => ordenacionPorSeleccion(d, false) },
+        { nombre: "Inserción", fn: (d) => ordenacionInsercion(d, false) }
+    ];
+
+    let tbody = document.getElementById("tabla-resultados");
+    metodos.forEach(m => {
+        let copia = clonar(listaTemporal);
+        let tInicio = performance.now();
+        let res = m.fn(copia);
+        let tFin = performance.now();
+        let tiempoMs = (tFin - tInicio).toFixed(4);
+
+        let tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td><strong>${m.nombre}</strong></td>
+            <td>${res.iteraciones.toLocaleString()}</td>
+            <td>${res.comparaciones.toLocaleString()}</td>
+            <td>${res.intercambios.toLocaleString()}</td>
+            <td>${tiempoMs} ms</td>
+        `;
+        tbody.appendChild(tr);
+    });
+</script>
+
+</body>
+</html>
