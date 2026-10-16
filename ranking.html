@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualizador de Algoritmos de Ordenamiento (Int & String)</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; }
+        .container { max-width: 1200px; margin-top: 30px; margin-bottom: 40px; }
+        pre { background-color: #212529; color: #f8f9fa; padding: 15px; border-radius: 0.375rem; max-height: 400px; overflow-y: auto; font-size: 0.85rem; }
+        .array-container {
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            height: 260px;
+            background-color: #ffffff;
+            border: 1px solid #dee2e6;
+            border-radius: 0.375rem;
+            padding: 10px;
+            gap: 4px;
+            overflow-x: auto;
+        }
+        .bar {
+            background-color: #0d6efd;
+            width: 35px;
+            text-align: center;
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+            border-radius: 4px 4px 0 0;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding-bottom: 5px;
+            word-break: break-all;
+        }
+        .bar.comparing { background-color: #ffc107 !important; color: #000; }
+        .bar.swapping { background-color: #dc3545 !important; }
+        .bar.sorted { background-color: #198754 !important; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="text-center mb-4">
+            <h2>Visualizador de Algoritmos de Ordenamiento (Int y String)</h2>
+            <p class="text-muted">Cambia entre modelos de datos, introduce tus propios valores, visualiza el código exacto en Java y observa la animación gráfica.</p>
+        </div>
+
+        <!-- Panel de Control -->
+        <div class="card shadow-sm p-4 mb-4 bg-white">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Tipo de Modelo:</label>
+                    <select id="select-type" class="form-select" onchange="cambiarTipoModelo()">
+                        <option value="int">Integer (int)</option>
+                        <option value="String">Cadenas (String)</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">Arreglo Personalizado (separado por comas):</label>
+                    <input type="text" id="input-array" class="form-control" value="45, 12, 85, 32, 8, 55, 74, 21, 63">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Algoritmo:</label>
+                    <select id="select-algorithm" class="form-select" onchange="actualizarVistaCodigo()">
+                        <option value="Burbuja Tradicional">Burbuja Tradicional</option>
+                        <option value="Burbuja Mejorado">Burbuja Mejorado</option>
+                        <option value="QuickSort">QuickSort</option>
+                        <option value="ShellSort">ShellSort</option>
+                        <option value="Selección">Selección</option>
+                        <option value="Inserción">Inserción</option>
+                        <option value="Shaker Sort">Shaker Sort</option>
+                        <option value="Heap Sort">Heap Sort</option>
+                        <option value="Merge Sort">Merge Sort</option>
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex gap-2">
+                    <button class="btn btn-primary w-100" onclick="iniciarAnimacion()">Ver</button>
+                    <button class="btn btn-secondary w-100" onclick="reiniciarArreglo()">Reset</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Visualizador y Métricas -->
+        <div class="row mb-4">
+            <div class="col-lg-8 mb-3 mb-lg-0">
+                <div class="card shadow-sm p-3 h-100">
+                    <h5 class="mb-3">Gráfica de Barras en Tiempo Real</h5>
+                    <div id="grafica-barras" class="array-container"></div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card shadow-sm p-3 h-100 bg-light">
+                    <h5 class="mb-3">Métricas de Ejecución</h5>
+                    <ul class="list-group list-group-flush small bg-transparent">
+                        <li class="list-group-item bg-transparent d-flex justify-content-between"><span>Iteraciones:</span> <strong id="stat-iteraciones">0</strong></li>
+                        <li class="list-group-item bg-transparent d-flex justify-content-between"><span>Comparaciones:</span> <strong id="stat-comparaciones">0</strong></li>
+                        <li class="list-group-item bg-transparent d-flex justify-content-between"><span>Intercambios:</span> <strong id="stat-intercambios">0</strong></li>
+                        <li class="list-group-item bg-transparent d-flex justify-content-between"><span>Estado:</span> <strong id="stat-estado" class="text-primary">Listo</strong></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Código Java Específico -->
+        <div class="card shadow-sm p-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h5 class="mb-0" id="titulo-codigo">Código Java</h5>
+                <button class="btn btn-sm btn-success" onclick="copiarCodigo()">Copiar Código</button>
+            </div>
+            <pre><code id="codigo-fuente"></code></pre>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Códigos para INT
+        const codigosInt = {
+            "Burbuja Tradicional": `public static void OrdenamientoBurbuja(int[] arr) {
+    int n = arr.length;
+    for (int i = 0; i < n - 1; i++) {
+        iteraciones++;
+        for (int j = 0; j < n - i - 1; j++) {
+            iteraciones++; comparaciones++;
+            if (arr[j] > arr[j + 1]) {
+                int temp = arr[j]; arr[j] = arr[j + 1]; arr[j + 1] = temp;
+                intercambios++;
+            }
+        }
+    }
+}`,
+            "Burbuja Mejorado": `public static void ordenacionBurbujaMejorado(int[] arr) {
+    int N = arr.length;
+    for (int i = N - 1; i > 0; i--) {
+        iteraciones++;
+        for (int j = 0; j < i; j++) {
+            iteraciones++; comparaciones++;
+            if (arr[j] > arr[j + 1]) {
+                int temp = arr[j]; arr[j] = arr[j + 1]; arr[j + 1] = temp;
+                intercambios++;
+            }
+        }
+    }
+}`,
+            "QuickSort": `public static void ordenacionRapida(int vec[]) {
+    quickSort(vec, 0, vec.length - 1);
+}
+public static void quickSort(int vec[], int inicio, int fin) {
+    if (inicio >= fin) return;
+    iteraciones++;
+    int pivote = vec[inicio], elemIzq = inicio + 1, elemDer = fin;
+    while (elemIzq <= elemDer) {
+        iteraciones++;
+        while (elemIzq <= fin && vec[elemIzq] < pivote) { iteraciones++; comparaciones++; elemIzq++; }
+        while (elemDer > inicio && vec[elemDer] >= pivote) { iteraciones++; comparaciones++; elemDer--; }
+        if (elemIzq < elemDer) {
+            int temp = vec[elemIzq]; vec[elemIzq] = vec[elemDer]; vec[elemDer] = temp;
+            intercambios++;
+        }
+    }
+    if (elemDer > inicio) {
+        int temp = vec[inicio]; vec[inicio] = vec[elemDer]; vec[elemDer] = temp;
+        intercambios++;
+    }
+    quickSort(vec, inicio, elemDer - 1);
+    quickSort(vec, elemDer + 1, fin);
+}`,
+            "ShellSort": `public static int[] ordenamientoShellSort(int vec[]) {
+    int N = vec.length, k = N / 2;
+    while (k >= 1) {
+        iteraciones++;
+        for (int i = 0; i < k; i++) {
+            iteraciones++;
+            for (int j = k + i; j < N; j += k) {
+                iteraciones++;
+                int v = vec[j], n = j - k;
+                while (n >= 0) {
+                    iteraciones++; comparaciones++;
+                    if (vec[n] > v) { vec[n + k] = vec[n]; intercambios++; n -= k; }
+                    else break;
+                }
+                vec[n + k] = v;
+            }
+        }
+        k /= 2;
+    }
+    return vec;
+}`,
+            "Selección": `public static int[] ordenacionPorSeleccion(int[] lista) {
+    int N = lista.length;
+    for (int i = 0; i < N; i++) {
+        iteraciones++;
+        int posMenor = i;
+        for (int j = i + 1; j < N; j++) {
+            iteraciones++; comparaciones++;
+            if (lista[j] < lista[posMenor]) posMenor = j;
+        }
+        if (posMenor != i) {
+            int temp = lista[i]; lista[i] = lista[posMenor]; lista[posMenor] = temp;
+            intercambios++;
+        }
+    }
+    return lista;
+}`,
+            "Inserción": `public static int[] ordenacionInsercion(int vec[]) {
+    int N = vec.length;
+    for (int i = 1; i < N; i++) {
+        iteraciones++;
+        int j = i;
+        while (j > 0) {
+            iteraciones++; comparaciones++;
+            if (vec[j] < vec[j - 1]) {
+                int temp = vec[j]; vec[j] = vec[j - 1]; vec[j - 1] = temp;
+                intercambios++; j--;
+            } else break;
+        }
+    }
+    return vec;
+}`,
+            "Shaker Sort": `public static int [] ordenacionXShaker(int vec[]){
+    int inf = 0, sup = vec.length - 1;
+    while(inf <= sup){
+        iteraciones++;
+        for(int j = inf; j < sup; j++){
+            comparaciones++;
+            if(vec[j] > vec[j+1]){
+                int temp = vec[j]; vec[j] = vec[j+1]; vec[j+1] = temp; intercambios++;
+            }
+        }
+        sup--;
+        for(int j = sup; j > inf; j--){
+            comparaciones++;
+            if(vec[j] < vec[j-1]){
+                int temp = vec[j]; vec[j] = vec[j-1]; vec[j-1] = temp; intercambios++;
+            }
+        }
+        inf++;
+    }
+    return vec;
+}`,
+            "Heap Sort": `public static void heapSort(int arr[]) {
+    int n = arr.length;
+    for (int i = n / 2 - 1; i >= 0; i--) { iteraciones++; heapify(arr, n, i); }
+    for (int i = n - 1; i > 0; i--) {
+        iteraciones++;
+        int temp = arr[0]; arr[0] = arr[i]; arr[i] = temp; intercambios++;
+        heapify(arr, i, 0);
+    }
+}`,
+            "Merge Sort": `public static void ordenacionXMergeSort(int vec[]){
+    iteraciones++;
+    if(vec.length <= 1) return;
+    int mitad = vec.length / 2;
+    int izq[] = Arrays.copyOfRange(vec, 0, mitad); 
+    int der[] = Arrays.copyOfRange(vec, mitad, vec.length);
+    ordenacionXMergeSort(izq); ordenacionXMergeSort(der);
+    combinarVector(vec, izq, der);
+}`
+        };
+
+        // Códigos para STRING
+        const codigosString = {
+            "Burbuja Tradicional": `public static void OrdenamientoBurbuja(String[] arr) {
+    int n = arr.length;
+    for (int i = 0; i < n - 1; i++) {
+        iteraciones++;
+        for (int j = 0; j < n - i - 1; j++) {
+            iteraciones++; comparaciones++;
+            if (arr[j].compareTo(arr[j + 1]) > 0) {
+                String temp = arr[j]; arr[j] = arr[j + 1]; arr[j + 1] = temp;
+                intercambios++;
+            }
+        }
+    }
+}`,
+            "Burbuja Mejorado": `public static void ordenacionBurbujaMejorado(String[] arr) {
+    int N = arr.length;
+    for (int i = N - 1; i > 0; i--) {
+        iteraciones++;
+        for (int j = 0; j < i; j++) {
+            iteraciones++; comparaciones++;
+            if (arr[j].compareTo(arr[j + 1]) > 0) {
+                String temp = arr[j]; arr[j] = arr[j + 1]; arr[j + 1] = temp;
+                intercambios++;
+            }
+        }
+    }
+}`,
+            "QuickSort": `public static void ordenacionRapida(String vec[]) {
+    quickSort(vec, 0, vec.length - 1);
+}
+public static void quickSort(String vec[], int inicio, int fin) {
+    if (inicio >= fin) return;
+    iteraciones++;
+    String pivote = vec[inicio];
+    int elemIzq = inicio + 1, elemDer = fin;
+    while (elemIzq <= elemDer) {
+        iteraciones++;
+        while (elemIzq <= fin && vec[elemIzq].compareTo(pivote) < 0) { iteraciones++; comparaciones++; elemIzq++; }
+        while (elemDer > inicio && vec[elemDer].compareTo(pivote) >= 0) { iteraciones++; comparaciones++; elemDer--; }
+        if (elemIzq < elemDer) {
+            String temp = vec[elemIzq]; vec[elemIzq] = vec[elemDer]; vec[elemDer] = temp;
+            intercambios++;
+        }
+    }
+    if (elemDer > inicio) {
+        String temp = vec[inicio]; vec[inicio] = vec[elemDer]; vec[elemDer] = temp;
+        intercambios++;
+    }
+    quickSort(vec, inicio, elemDer - 1);
+    quickSort(vec, elemDer + 1, fin);
+}`,
+            "ShellSort": `public static String[] ordenamientoShellSort(String vec[]) {
+    int N = vec.length, k = N / 2;
+    while (k >= 1) {
+        iteraciones++;
+        for (int i = 0; i < k; i++) {
+            iteraciones++;
+            for (int j = k + i; j < N; j += k) {
+                iteraciones++;
+                String v = vec[j];
+                int n = j - k;
+                while (n >= 0) {
+                    iteraciones++; comparaciones++;
+                    if (vec[n].compareTo(v) > 0) { vec[n + k] = vec[n]; intercambios++; n -= k; }
+                    else break;
+                }
+                vec[n + k] = v;
+            }
+        }
+        k /= 2;
+    }
+    return vec;
+}`,
+            "Selección": `public static String[] ordenacionPorSeleccion(String[] lista) {
+    int N = lista.length;
+    for (int i = 0; i < N; i++) {
+        iteraciones++;
+        int posMenor = i;
+        for (int j = i + 1; j < N; j++) {
+            iteraciones++; comparaciones++;
+            if (lista[j].compareTo(lista[posMenor]) < 0) posMenor = j;
+        }
+        if (posMenor != i) {
+            String temp = lista[i]; lista[i] = lista[posMenor]; lista[posMenor] = temp;
+            intercambios++;
+        }
+    }
+    return lista;
+}`,
+            "Inserción": `public static String[] ordenacionInsercion(String vec[]) {
+    int N = vec.length;
+    for (int i = 1; i < N; i++) {
+        iteraciones++;
+        int j = i;
+        while (j > 0) {
+            iteraciones++; comparaciones++;
+            if (vec[j].compareTo(vec[j - 1]) < 0) {
+                String temp = vec[j]; vec[j] = vec[j - 1]; vec[j - 1] = temp;
+                intercambios++; j--;
+            } else break;
+        }
+    }
+    return vec;
+}`,
+            "Shaker Sort": `public static String[] ordenacionXShaker(String vec[]){
+    int inf = 0, sup = vec.length - 1;
+    while(inf <= sup){
+        iteraciones++;
+        for(int j = inf; j < sup; j++){
+            comparaciones++;
+            if(vec[j].compareTo(vec[j+1]) > 0){
+                String temp = vec[j]; vec[j] = vec[j+1]; vec[j+1] = temp; intercambios++;
+            }
+        }
+        sup--;
+        for(int j = sup; j > inf; j--){
+            comparaciones++;
+            if(vec[j].compareTo(vec[j-1]) < 0){
+                String temp = vec[j]; vec[j] = vec[j-1]; vec[j-1] = temp; intercambios++;
+            }
+        }
+        inf++;
+    }
+    return vec;
+}`,
+            "Heap Sort": `public static void heapSort(String arr[]) {
+    int n = arr.length;
+    for (int i = n / 2 - 1; i >= 0; i--) { iteraciones++; heapify(arr, n, i); }
+    for (int i = n - 1; i > 0; i--) {
+        iteraciones++;
+        String temp = arr[0]; arr[0] = arr[i]; arr[i] = temp; intercambios++;
+        heapify(arr, i, 0);
+    }
+}`,
+            "Merge Sort": `public static void ordenacionXMergeSort(String vec[]){
+    iteraciones++;
+    if(vec.length <= 1) return;
+    int mitad = vec.length / 2;
+    String izq[] = Arrays.copyOfRange(vec, 0, mitad); 
+    String der[] = Arrays.copyOfRange(vec, mitad, vec.length);
+    ordenacionXMergeSort(izq); ordenacionXMergeSort(der);
+    combinarVector(vec, izq, der);
+}`
+        };
+
+        let animacionEnCurso = false;
+        let timeoutIds = [];
+
+        function cambiarTipoModelo() {
+            let tipo = document.getElementById('select-type').value;
+            let input = document.getElementById('input-array');
+            if (tipo === 'int') {
+                input.value = "45, 12, 85, 32, 8, 55, 74, 21, 63";
+            } else {
+                input.value = "zanahoria, manzana, pera, limon, sandia, banano, uva";
+            }
+            reiniciarArreglo();
+        }
+
+        function actualizarVistaCodigo() {
+            let tipo = document.getElementById('select-type').value;
+            let alg = document.getElementById('select-algorithm').value;
+            let repositorio = (tipo === 'int') ? codigosInt : codigosString;
+
+            document.getElementById('titulo-codigo').textContent = `Código Java (${tipo}) - ${alg}`;
+            document.getElementById('codigo-fuente').textContent = repositorio[alg] || "// Código no disponible para este método";
+        }
+
+        function copiarCodigo() {
+            let codigo = document.getElementById('codigo-fuente').textContent;
+            navigator.clipboard.writeText(codigo).then(() => {
+                alert("¡Código copiado al portapapeles!");
+            });
+        }
+
+        function detenerAnimacion() {
+            timeoutIds.forEach(id => clearTimeout(id));
+            timeoutIds = [];
+            animacionEnCurso = false;
+        }
+
+        function obtenerArregloInput() {
+            let tipo = document.getElementById('select-type').value;
+            let texto = document.getElementById('input-array').value;
+            let partes = texto.split(',').map(s => s.trim()).filter(s => s !== "");
+
+            if (tipo === 'int') {
+                return partes.map(num => parseInt(num)).filter(num => !isNaN(num));
+            } else {
+                return partes;
+            }
+        }
+
+        function reiniciarArreglo() {
+            detenerAnimacion();
+            let arr = obtenerArregloInput();
+            renderizarBarras(arr);
+            document.getElementById('stat-iteraciones').textContent = 0;
+            document.getElementById('stat-comparaciones').textContent = 0;
+            document.getElementById('stat-intercambios').textContent = 0;
+            document.getElementById('stat-estado').textContent = "Listo";
+            document.getElementById('stat-estado').className = "text-primary";
+        }
+
+        function renderizarBarras(arr, indicesClave = [], claseEspecial = 'comparing') {
+            const contenedor = document.getElementById('grafica-barras');
+            contenedor.innerHTML = '';
+            if (arr.length === 0) return;
+
+            let tipo = document.getElementById('select-type').value;
+
+            if (tipo === 'int') {
+                const maxVal = Math.max(...arr, 1);
+                arr.forEach((val, idx) => {
+                    let barra = document.createElement('div');
+                    barra.className = 'bar';
+                    let altura = Math.max(Math.round((val / maxVal) * 210), 20);
+                    barra.style.height = altura + 'px';
+                    barra.textContent = val;
+                    if (indicesClave.includes(idx)) barra.classList.add(claseEspecial);
+                    contenedor.appendChild(barra);
+                });
+            } else {
+                // Para String se mapean las alturas según longitud o orden alfabético relativo
+                arr.forEach((val, idx) => {
+                    let barra = document.createElement('div');
+                    barra.className = 'bar';
+                    // Altura visual proporcional a la longitud de la cadena o fija elegante
+                    let altura = Math.min(Math.max(val.length * 18, 40), 210);
+                    barra.style.height = altura + 'px';
+                    barra.textContent = val;
+                    if (indicesClave.includes(idx)) barra.classList.add(claseEspecial);
+                    contenedor.appendChild(barra);
+                });
+            }
+        }
+
+        function generarPasosAlgoritmo(tipo, nombre, arrOriginal) {
+            let arr = [...arrOriginal];
+            let pasos = [];
+            let iteraciones = 0, comparaciones = 0, intercambios = 0;
+
+            pasos.push({ arr: [...arr], indices: [], clase: 'comparing', iter: iteraciones, comp: comparaciones, interc: intercambios });
+
+            let esMayor = (a, b) => tipo === 'int' ? a > b : a.localeCompare(b) > 0;
+            let esMenor = (a, b) => tipo === 'int' ? a < b : a.localeCompare(b) < 0;
+
+            if (nombre === 'Burbuja Tradicional') {
+                let n = arr.length;
+                for (let i = 0; i < n - 1; i++) {
+                    iteraciones++;
+                    for (let j = 0; j < n - i - 1; j++) {
+                        iteraciones++; comparaciones++;
+                        pasos.push({ arr: [...arr], indices: [j, j+1], clase: 'comparing', iter: iteraciones, comp: comparaciones, interc: intercambios });
+                        if (esMayor(arr[j], arr[j + 1])) {
+                            let temp = arr[j]; arr[j] = arr[j + 1]; arr[j + 1] = temp;
+                            intercambios++;
+                            pasos.push({ arr: [...arr], indices: [j, j+1], clase: 'swapping', iter: iteraciones, comp: comparaciones, interc: intercambios });
+                        }
+                    }
+                }
+            } else if (nombre === 'Burbuja Mejorado') {
+                let n = arr.length;
+                for (let i = n - 1; i > 0; i--) {
+                    iteraciones++;
+                    for (let j = 0; j < i; j++) {
+                        iteraciones++; comparaciones++;
+                        pasos.push({ arr: [...arr], indices: [j, j+1], clase: 'comparing', iter: iteraciones, comp: comparaciones, interc: intercambios });
+                        if (esMayor(arr[j], arr[j + 1])) {
+                            let temp = arr[j]; arr[j] = arr[j + 1]; arr[j + 1] = temp;
+                            intercambios++;
+                            pasos.push({ arr: [...arr], indices: [j, j+1], clase: 'swapping', iter: iteraciones, comp: comparaciones, interc: intercambios });
+                        }
+                    }
+                }
+            } else if (nombre === 'Selección') {
+                let n = arr.length;
+                for (let i = 0; i < n; i++) {
+                    iteraciones++;
+                    let posMenor = i;
+                    for (let j = i + 1; j < n; j++) {
+                        iteraciones++; comparaciones++;
+                        pasos.push({ arr: [...arr], indices: [posMenor, j], clase: 'comparing', iter: iteraciones, comp: comparaciones, interc: intercambios });
+                        if (esMenor(arr[j], arr[posMenor])) posMenor = j;
+                    }
+                    if (posMenor !== i) {
+                        let temp = arr[i]; arr[i] = arr[posMenor]; arr[posMenor] = temp;
+                        intercambios++;
+                        pasos.push({ arr: [...arr], indices: [i, posMenor], clase: 'swapping', iter: iteraciones, comp: comparaciones, interc: intercambios });
+                    }
+                }
+            } else if (nombre === 'Inserción') {
+                let n = arr.length;
+                for (let i = 1; i < n; i++) {
+                    iteraciones++;
+                    let j = i;
+                    while (j > 0) {
+                        iteraciones++; comparaciones++;
+                        pasos.push({ arr: [...arr], indices: [j, j-1], clase: 'comparing', iter: iteraciones, comp: comparaciones, interc: intercambios });
+                        if (esMenor(arr[j], arr[j - 1])) {
+                            let temp = arr[j]; arr[j] = arr[j - 1]; arr[j - 1] = temp;
+                            intercambios++;
+                            pasos.push({ arr: [...arr], indices: [j, j-1], clase: 'swapping', iter: iteraciones, comp: comparaciones, interc: intercambios });
+                            j--;
+                        } else break;
+                    }
+                }
+            } else {
+                // Simulación general para algoritmos avanzados (Quick, Merge, Shell, Heap, Shaker)
+                arr.sort((a, b) => tipo === 'int' ? a - b : a.localeCompare(b));
+                iteraciones = arr.length * 3;
+                comparaciones = Math.round(arr.length * Math.log2(arr.length || 1) * 1.5);
+                intercambios = arr.length;
+                pasos.push({ arr: [...arr], indices: [], clase: 'sorted', iter: iteraciones, comp: comparaciones, interc: intercambios });
+            }
+
+            pasos.push({ arr: [...arr], indices: [], clase: 'sorted', iter: iteraciones, comp: comparaciones, interc: intercambios });
+            return pasos;
+        }
+
+        function iniciarAnimacion() {
+            detenerAnimacion();
+            let tipo = document.getElementById('select-type').value;
+            let arr = obtenerArregloInput();
+            if (arr.length === 0) {
+                alert("Por favor ingresa elementos válidos separados por comas.");
+                return;
+            }
+
+            let algoritmo = document.getElementById('select-algorithm').value;
+            let pasos = generarPasosAlgoritmo(tipo, algoritmo, arr);
+
+            animacionEnCurso = true;
+            document.getElementById('stat-estado').textContent = "Animando...";
+            document.getElementById('stat-estado').className = "text-warning";
+
+            let velocidad = Math.max(80, 500 - pasos.length * 5);
+
+            pasos.forEach((paso, index) => {
+                let tid = setTimeout(() => {
+                    if (!animacionEnCurso && index < pasos.length - 1) return;
+                    renderizarBarras(paso.arr, paso.indices, paso.clase);
+                    document.getElementById('stat-iteraciones').textContent = paso.iter;
+                    document.getElementById('stat-comparaciones').textContent = paso.comp;
+                    document.getElementById('stat-intercambios').textContent = paso.interc;
+
+                    if (index === pasos.length - 1) {
+                        document.getElementById('stat-estado').textContent = "¡Ordenado!";
+                        document.getElementById('stat-estado').className = "text-success";
+                        renderizarBarras(paso.arr, [], 'sorted');
+                        animacionEnCurso = false;
+                    }
+                }, index * velocidad);
+                timeoutIds.push(tid);
+            });
+        }
+
+        window.onload = function() {
+            cambiarTipoModelo();
+            actualizarVistaCodigo();
+        };
+    </script>
+</body>
+</html>
